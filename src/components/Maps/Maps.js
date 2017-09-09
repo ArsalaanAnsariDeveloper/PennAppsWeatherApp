@@ -11,25 +11,87 @@ let LONGITUDE = -122.4324;
 const LATITUDE_DELTA = 0.001;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 let id = 0;
-
+let press = 0;
 function randomColor() {
     return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
   }
 export default class Maps extends Component {
-
-    
-    
   
     constructor(props) {
         super(props);
     
         this.state = {
-         
+          locationResponse: "",
           markers: [],
-        };
+        }; 
       }
+
+      componentDidMount(){
+        fetch('http://disasternotifs.com/', {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              latitude: Number(this.props.latitude),
+              longitude: Number(this.props.longitude),
+            })
+          })
+          .then((response) => response.json())
+          .then((responseJson) => {
+            console.log(responseJson)
+            this.setState({
+                locationResponse: responseJson,
+            });
+            //alert(JSON.stringify(responseJson[0]))
+            
+            let counter = 0;
+            while(counter < responseJson.length){
+                if(responseJson[counter].type == "grocer"){
+                  if(responseJson[counter].status == null){
+                    this.state.markers.push({coordinate: {latitude: Number(JSON.stringify(responseJson[counter].latitude)), longitude: Number(JSON.stringify(responseJson[counter].longitude))}, key: id++, color:'#7fffd4', title: responseJson[counter].type});
+                  }else{
+                    this.state.markers.push({coordinate: {latitude: Number(JSON.stringify(responseJson[counter].latitude)), longitude: Number(JSON.stringify(responseJson[counter].longitude))}, key: id++, color:'#FF0000', title: responseJson[counter].type});
+                  }
+                }
+                counter = counter + 1; 
+            }
+            
+            
+            //console.log("TEST" + JSON.stringify(this.state.markers))
+            // update(Number(JSON.stringify(responseJson[0].latitude)),Number(JSON.stringify(responseJson[0].longitude)) )
+            
+           
+           return responseJson;
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+          
+      }
+
+      update(lat, long, title){
+        alert("This will change the status of the location")
+        fetch('http://disasternotifs.com/update/', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+
+            latitude: lat,
+            longitude: long,
+            type: title,
+            status: false,
+          })
+        })
+      }
+      
     
       onMapPress(e) {
+       
         this.setState({
           markers: [
             ...this.state.markers,
@@ -40,13 +102,25 @@ export default class Maps extends Component {
             },
           ],
         });
-      }
+        console.log(this.state.markers)
+    
       
+    }
+
+   
+ 
   
     render() {
+      //alert(JSON.stringify(this.state.locationResponse))
       let lat = Number(this.props.latitude);
       let long = Number(this.props.longitude);
-     
+      let loop = false;
+    
+
+      //alert(testLat)
+      //alert(testLong)
+    //this.state.markers.push({coordinate: {latitude: lat, longitude: long}, key: id++, color: randomColor(), title: "Your Location"})
+    
     return (
       <View style={styles.container}>
       
@@ -60,25 +134,31 @@ export default class Maps extends Component {
         }
             
         }
-        onPress={(e) => this.onMapPress(e)}
         
-
-    >
+        onPress={(e) => this.onMapPress(e)}        
+    >    
+    
+    
     {this.state.markers.map(marker => (
+            
             <MapView.Marker
               key={marker.key}
               coordinate={marker.coordinate}
               pinColor={marker.color}
+              title = {marker.title}
+              onCalloutPress={() => this.update(marker.coordinate.latitude, marker.coordinate.longitude, marker.title)}
             />
+            
           ))}
     </MapView>
 
           <View style={styles.buttonContainer}> 
           <TouchableOpacity
             onPress={() => this.setState({ markers: [] })}
+
             style={styles.bubble}
           >
-            <Text>Clear Tags</Text>
+            <Text>Click on screen to load locations</Text>
           </TouchableOpacity>
         
           </View>
