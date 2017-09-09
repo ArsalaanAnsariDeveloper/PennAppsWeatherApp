@@ -1,13 +1,20 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 
+
+
 export default class MyButton extends Component {
+
+ 
   render() {
+  //  const { navigate } = this.props.navigation;
+
     return (
       <View style={styles.container}>
         
         <TouchableOpacity style={styles.buttonContainer}>
-          <Text style={styles.textStyle} >GPS Lookup</Text>
+        
+          <Text style={styles.textStyle} >{this.props.title}</Text>
 
         </TouchableOpacity>
 
@@ -16,6 +23,9 @@ export default class MyButton extends Component {
     );
   }
 }
+
+
+
 
 const styles = StyleSheet.create({
   container: {

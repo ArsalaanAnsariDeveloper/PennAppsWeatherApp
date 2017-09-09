@@ -3,14 +3,17 @@ import { StyleSheet, Text, View} from 'react-native';
 import {MapView} from 'expo';
 export default class Maps extends Component {
   render() {
+      let lat = Number(this.props.latitude);
+      let long = Number(this.props.longitude);
+     
     return (
       <View style={styles.container}>
       <View style={styles.map}>
       <MapView
         style={{ flex: 1 }}
         initialRegion={{
-          latitude: 40.783060,
-          longitude: -73.971249,
+          latitude: lat,
+          longitude: long,
           latitudeDelta: 0.001,
           longitudeDelta: 0.001,
         }}
