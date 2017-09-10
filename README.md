@@ -1,3 +1,27 @@
+
+## Inspiration
+With the news of Hurricane Irma, Harvey, and the destructive wildfires ravaging western states, we learned that many people under crises situations have difficulty coordinating supplies and operating statuses of nearby stores and shelters. We decided that this would be a meaningful and realistic problem to tackle with the advent of crowdsourcing and mobile technologies.
+
+## What it does
+The mobile app helps users find local resources such as food, gas, and shelters. On top of a map display, we've incorporated a tagging system to help keep track of inventory, safety, and functionality of stores, gas stations, and shelters. Any user can contribute to the tagging system by adding new tags, and any tags they add are stored in the database and synced across the entire platform. This way if a shelter is at full capacity, other users will instantly learn about it and not waste their efforts to travel there.
+
+## How we built it
+We used React Native to build a mobile application for iOS and Android. For the entire development cycle we used Expo to test the app on our own Android and iOS platforms. The app connects to an API provided by an Express app that is hosted an nginx server running on AWS to access relevant data. We gathered this data through a combination of web scraping, the Foursquare API, and the Google Places API. We looked at several alternatives for API's and determined that these were the best tools available to us. The data is stored in a Mongo database.
+
+## Challenges we ran into
+The biggest challenge was finding datasets for grocery stores, supermarkets, gas stations, and shelters. We explored different options for API's and datasets to use, such as NREL, Walmart's API, and the Red Cross website. However the best by far were Google Places API, Foursquare's API, and FEMA's MapService. One issue we ran into was that the FEMA website returned 404 errors for most of Friday night. We ended up writing an email to the Department of Homeland Security detailing the technical issue and they fixed it shortly after we sent it.
+
+## Accomplishments that we're proud of
+Given our lack of hackathon experience, we are proud that we are able to come up with and execute on a practical, yet novel solution to a topical issue. We were able to distribute tasks among the three of us to develop an entire React Native app built on a robust backend that allows users to view important resource data in real time.
+
+## What we learned
+We learned how to effectively coordinate front-end and and back-end work. More specifically, we learned how to develop a React Native app from scratch as well as build an API to expose specific endpoints to handle data delivery between the app and the database.
+
+## What's next for Disaster Source
+We hope to bring this to the public. To do this, we will streamline the user experience, and restructure the backend to scale appropriately. We also hope to find additional data of higher accuracy, and introduce weighted tags to better reflect the inventory of stores.
+
+## SETUP
+
 This project was bootstrapped with [Create React Native App](https://github.com/react-community/create-react-native-app).
 
 Below you'll find information about performing common tasks. The most recent version of this guide is available [here](https://github.com/react-community/create-react-native-app/blob/master/react-native-scripts/template/README.md).
