@@ -1,17 +1,15 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, Dimensions, TouchableOpacity} from 'react-native';
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity, Alert} from 'react-native';
 import {MapView} from 'expo';
 
 
 const { width, height } = Dimensions.get('window');
 
 const ASPECT_RATIO = width / height;
-let LATITUDE = 37.78825;
-let LONGITUDE = -122.4324;
-const LATITUDE_DELTA = 0.001;
-const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
+
 let id = 0;
 let press = 0;
+let alertMessage = "test";
 function randomColor() {
     return `#${Math.floor(Math.random() * 16777215).toString(16)}`;
   }
@@ -23,6 +21,7 @@ export default class Maps extends Component {
         this.state = {
           locationResponse: "",
           markers: [],
+          alertMessage: "Test"
         }; 
       }
 
@@ -34,8 +33,14 @@ export default class Maps extends Component {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
+              // IMPORTANT 
               latitude: Number(this.props.latitude),
-              longitude: Number(this.props.longitude),
+              longitude: Number(this.props.longitude)
+              //latitude: 25.940532 ,
+              //longitude: -80.257173,
+
+               
+
             })
           })
           .then((response) => response.json())
@@ -44,23 +49,38 @@ export default class Maps extends Component {
             this.setState({
                 locationResponse: responseJson,
             });
-            //alert(JSON.stringify(responseJson[0]))
             
             let counter = 0;
             while(counter < responseJson.length){
-                if(responseJson[counter].type == "grocer"){
-                  if(responseJson[counter].status == null){
-                    this.state.markers.push({coordinate: {latitude: Number(JSON.stringify(responseJson[counter].latitude)), longitude: Number(JSON.stringify(responseJson[counter].longitude))}, key: id++, color:'#7fffd4', title: responseJson[counter].type});
+              
+                if(responseJson[counter].type == this.props.type){
+                  if(responseJson[counter].status == "functional"){
+                    if(this.props.type == "shelter"){
+                      this.state.markers.push({coordinate: {latitude: Number(JSON.stringify(responseJson[counter].latitude)), longitude: Number(JSON.stringify(responseJson[counter].longitude))}, key: id++, color:'#7fffd4', title: responseJson[counter].type, description: "Space Available"});
+                      
+                    }else{
+                      this.state.markers.push({coordinate: {latitude: Number(JSON.stringify(responseJson[counter].latitude)), longitude: Number(JSON.stringify(responseJson[counter].longitude))}, key: id++, color:'#7fffd4', title: responseJson[counter].type, description: "Stocked"});
+                    }
+                  }else if(responseJson[counter].status == "notFunctional" || responseJson[counter].status == false ) {
+                    if(this.props.type == "shelter"){
+                      this.state.markers.push({coordinate: {latitude: Number(JSON.stringify(responseJson[counter].latitude)), longitude: Number(JSON.stringify(responseJson[counter].longitude))}, key: id++, color:'#FF0000', title: responseJson[counter].type, description: "Full"});
+                      
+                    }else{
+                      this.state.markers.push({coordinate: {latitude: Number(JSON.stringify(responseJson[counter].latitude)), longitude: Number(JSON.stringify(responseJson[counter].longitude))}, key: id++, color:'#FF0000', title: responseJson[counter].type, description: "Not Available"});                      
+                    }
                   }else{
-                    this.state.markers.push({coordinate: {latitude: Number(JSON.stringify(responseJson[counter].latitude)), longitude: Number(JSON.stringify(responseJson[counter].longitude))}, key: id++, color:'#FF0000', title: responseJson[counter].type});
+                    if(this.props.type == "shelter"){
+                      this.state.markers.push({coordinate: {latitude: Number(JSON.stringify(responseJson[counter].latitude)), longitude: Number(JSON.stringify(responseJson[counter].longitude))}, key: id++, color:'#ffa500', title: responseJson[counter].type, description: "Near Capacity"}); 
+                    }else{
+                      this.state.markers.push({coordinate: {latitude: Number(JSON.stringify(responseJson[counter].latitude)), longitude: Number(JSON.stringify(responseJson[counter].longitude))}, key: id++, color:'#ffa500', title: responseJson[counter].type, description: "Unstocked"});
+                    }
                   }
                 }
                 counter = counter + 1; 
             }
             
             
-            //console.log("TEST" + JSON.stringify(this.state.markers))
-            // update(Number(JSON.stringify(responseJson[0].latitude)),Number(JSON.stringify(responseJson[0].longitude)) )
+           
             
            
            return responseJson;
@@ -72,7 +92,41 @@ export default class Maps extends Component {
       }
 
       update(lat, long, title){
-        alert("This will change the status of the location")
+
+        
+        if(title != 'shelter'){
+          Alert.alert(
+          'Report Location',
+          'The following buttons will report a location for either having no supplies or being non functional. If you wish to not proceed please press cancel.',
+          [
+            {text: 'Not Available', onPress: () => this.push("notFunctional", lat, long, title)},
+            {text: 'Unstocked', onPress: () => this.push("noSupplies",lat, long, title)}, 
+            {text: 'Stocked', onPress: () => this.push("functional", lat, long, title)},
+          ],
+          { cancelable: true }
+        ) 
+      }
+      else{
+        Alert.alert(
+          'Report Location',
+          'The following buttons will report a location for having space available, being near capacity, or being full. If you wish to not proceed please press the back button.',
+          [
+            {text: 'Full', onPress: () => this.push("notFunctional", lat, long, title)},
+            {text: 'Near Capacity', onPress: () => this.push("noSupplies",lat, long, title)}, 
+            {text: 'Space Available', onPress: () => this.push("functional", lat, long, title)},
+          ],
+          { cancelable: true }
+        ) 
+
+      }       
+
+        
+
+        
+    }
+      
+    push(command, lat, long, title){
+      
         fetch('http://disasternotifs.com/update/', {
           method: 'POST',
           headers: {
@@ -84,11 +138,11 @@ export default class Maps extends Component {
             latitude: lat,
             longitude: long,
             type: title,
-            status: false,
+            status: command,
           })
-        })
-      }
-      
+      })
+    
+    }
     
       onMapPress(e) {
        
@@ -98,7 +152,7 @@ export default class Maps extends Component {
             {
               coordinate: e.nativeEvent.coordinate,
               key: id++,
-              color: randomColor(),
+              color: '#7D26CD',
             },
           ],
         });
@@ -111,15 +165,15 @@ export default class Maps extends Component {
  
   
     render() {
-      //alert(JSON.stringify(this.state.locationResponse))
+      
+      //IMPORTANT
       let lat = Number(this.props.latitude);
       let long = Number(this.props.longitude);
+      //let lat = 25.940532
+      //let long = -80.257173
       let loop = false;
     
 
-      //alert(testLat)
-      //alert(testLong)
-    //this.state.markers.push({coordinate: {latitude: lat, longitude: long}, key: id++, color: randomColor(), title: "Your Location"})
     
     return (
       <View style={styles.container}>
@@ -127,7 +181,7 @@ export default class Maps extends Component {
       <MapView 
         style={styles.map}
         initialRegion={{
-            latitude: lat,
+          latitude: lat,
           longitude: long,
           latitudeDelta: 0.001,
           longitudeDelta: 0.001,
@@ -146,6 +200,7 @@ export default class Maps extends Component {
               coordinate={marker.coordinate}
               pinColor={marker.color}
               title = {marker.title}
+              description = {marker.description}
               onCalloutPress={() => this.update(marker.coordinate.latitude, marker.coordinate.longitude, marker.title)}
             />
             
@@ -158,7 +213,7 @@ export default class Maps extends Component {
 
             style={styles.bubble}
           >
-            <Text>Click on screen to load locations</Text>
+            <Text>Click to clear locations</Text>
           </TouchableOpacity>
         
           </View>

@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { Platform, StyleSheet, Text, View, Button, onPressLearnMore,TouchableOpacity} from 'react-native';
-import { Constants, Location, Permissions } from 'expo';
+import { Constants, Location, Permissions, Font } from 'expo';
 import { StackNavigator } from 'react-navigation';
+
 
 import MyButton from './src/components/Button/myButton'
 import Maps from './src/components/Maps/Maps'
@@ -10,7 +11,7 @@ import Maps from './src/components/Maps/Maps'
 
 class HomeScreen extends Component {
   static navigationOptions = {
-      title: 'Welcome',
+      title: 'Disaster Source',
     };
   state = {
   location: null,
@@ -25,6 +26,8 @@ componentWillMount() {
   } else {
     this._getLocationAsync();
   }
+  
+  
 }
 
 _getLocationAsync = async () => {
@@ -75,22 +78,35 @@ render() {
 
     <View style={styles.container}>
       <Text style={styles.text}>{text}</Text>
-      <Text>Latitude: {latitude}</Text>
-      <Text>Longitude: {longitude}</Text>
+      <Text style={styles.textSmall}>Latitude: {latitude}</Text>
+      <Text style={styles.textSmall}>Longitude: {longitude}</Text>
       <View style={styles.buttonStyle}>
       
 
       <Button
-        onPress={() => navigate('Chat', {lat: latitude, long: longitude})}
+        onPress={() => navigate('Chat', {lat: latitude, long: longitude, type:"gas"})}
         title="Nearest Functional Gas Station"
       />
 
       <View style={styles.buttonStyle}></View>
 
       <Button
-        onPress={() => navigate('Chat', {lat: latitude, long: longitude})}
+        onPress={() => navigate('Chat', {lat: latitude, long: longitude, type:"grocer"})}
         title="Nearest Stocked Grocery Store"
       />
+
+      <View style={styles.buttonStyle}></View>
+
+      <Button
+        onPress={() => navigate('Chat', {lat: latitude, long: longitude, type:"shelter"})}
+        title="Available Shelters"
+      />
+
+      
+
+     
+        
+    
 
       </View>
 
@@ -103,7 +119,7 @@ render() {
 
 class ChatScreen extends Component {
   static navigationOptions = {
-    title: 'GoogleMaps',
+    title: 'Map',
   };
 
   
@@ -111,7 +127,7 @@ class ChatScreen extends Component {
     const { params } = this.props.navigation.state;
     return (
       
-      <Maps latitude={params.lat} longitude={params.long}/>
+      <Maps latitude={params.lat} longitude={params.long} type={params.type}/>
     );
   }
 }
@@ -131,7 +147,7 @@ export default class App extends Component {
     
     
     return (
-      <AppNavigation/>
+      <AppNavigation styles={styles.navStyle}/>
     );
   }
 }
@@ -139,18 +155,33 @@ export default class App extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FF0000',
     alignItems: 'center',
     justifyContent: 'center',
   },
   text: {
     
-    fontSize: 32
+    fontSize: 26,
+    fontFamily:'Roboto', 
+    fontWeight: '800',
+    
+    color: 'yellow',
+
+  },
+
+  textSmall: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: 'yellow'
 
   },
   
   buttonStyle: {
     padding : 25
+
+  },
+  navStyle :{
+    justifyContent: 'center'
 
   }
 });
